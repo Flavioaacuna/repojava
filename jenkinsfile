@@ -6,10 +6,7 @@ def getBuildUser(){
     return currentBuild.rawBuld.getCause(Cause.UserIdCause).getUserId()
 }
 pipeline {
-    agent any
-    environment{
-        BUILD_USER = ''
-        
+    agent any 
         stages {
          
         stage('Test') {
@@ -55,15 +52,17 @@ pipeline {
         
             } 
      }
-     
-}
-}
+     post {
+        always {
 
-def custom_msg()
-{
-def JENKINS_URL= "172.23.154.175:8080"
-def JOB_NAME = env.JOB_NAME
-def BUILD_ID= env.BUILD_ID
-def JENKINS_LOG= " FAILED: Job [${env.JOB_NAME}] Logs path: ${JENKINS_URL}/job/${JOB_NAME}/${BUILD_ID}/consoleText"
-return JENKINS_LOG
+            script{
+                BUILD_USER = getBuildUser()
+            }
+
+            slackSend channel: 'notificaciones-desde-jenkins',
+                      color: COLOR_MAP[currentBuild.currentResult],
+                      message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by ${BUILD_USER} \n More info at ${env.BUILD_URL}HTML_"
+
+        }
+}
 }
