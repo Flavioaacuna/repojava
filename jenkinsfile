@@ -10,7 +10,7 @@ sh 'mvn -B package'
 
 stage('SonarQube analysis') {
 environment {
-SCANNER_HOME = tool 'SonarQube Conexion'
+SCANNER_HOME = tool 'Sonarqube'
 }
 steps {
 withSonarQubeEnv(credentialsId: 'Sonar', installationName: 'Sonarqube') {
