@@ -18,19 +18,11 @@ pipeline {
 }
 }
 
-        stage('SonarQube analysis') {
-        environment {
-        SCANNER_HOME = tool 'sonarqube'
-}
-        steps {
-            withSonarQubeEnv(credentialsId: 'SecretTextContent', installationName: 'SonarQube') {
-            sh '''$SCANNER_HOME/bin/sonar-scanner \
-            -Dsonar.projectKey=projectKey \
-            -Dsonar.projectName=projectName \
-            -Dsonar.sources=src/ \
-            -Dsonar.java.binaries=target/classes/ \
-            -Dsonar.exclusions=src/test/java/*/.java \
-            -Dsonar.projectVersion=${BUILD_NUMBER}-${GIT_COMMIT_SHORT}'''
+stage('Test') {
+            steps {
+                 sh "mvn clean verify sonar:sonar -Dsonar.projectKey=ScannerMavenJenkins \
+                                                  -Dsonar.host.url=http://localhost:9000 \
+                                                  -Dsonar.login=sqp_98788e87facf9eeb7295ce9a2ebc2c54bf292101"
 }
 }
 }
