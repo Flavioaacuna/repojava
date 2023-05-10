@@ -46,9 +46,6 @@ pipeline {
             } 
      }
 }
-
-}
-}
     post {
         always {
                 slackSend message:"Regardless of the completion status of the Pipeline or stage run - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
@@ -81,4 +78,3 @@ pipeline {
                 slackSend message:"Every other post condition has been evaluated - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
         }            
     }
-} 
