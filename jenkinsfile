@@ -52,12 +52,8 @@ pipeline {
         
             } 
      }
-}
-
-
-
-post {
-        always {
+     post {
+        failure {
 
             script{
                 BUILD_USER = getBuildUser()
@@ -69,6 +65,8 @@ post {
 
         }
 }
+}
+
 
 def custom_msg()
 {
