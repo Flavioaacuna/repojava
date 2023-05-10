@@ -20,7 +20,7 @@ pipeline {
 
         stage('SonarQube analysis') {
         environment {
-        SCANNER_HOME = tool 'SonarQube Conexion'
+        SCANNER_HOME = tool 'sonarqube'
 }
         steps {
             withSonarQubeEnv(credentialsId: 'SecretTextContent', installationName: 'SonarQube') {
