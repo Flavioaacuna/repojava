@@ -1,69 +1,82 @@
-def COLOR_MAP = [
-    'SUCCESS': 'good',
-    'Failure': 'danger'
-]
-def getBuildUser(){
-    return currentBuild.rawBuld.getCause(Cause.UserIdCause).getUserId()
-}
 pipeline {
-    agent any 
-        stages {
-         
-        stage('Test') {
-            steps {
-                 sh "mvn clean verify sonar:sonar \
-                 -Dsonar.projectKey=Sonar-jenkins \
-                 -Dsonar.projectName='Sonar-jenkins' \
-                 -Dsonar.host.url=http://172.23.154.175:9000 \
-                 -Dsonar.token=sqp_a732c6fc7dd59e223310557619ae5fbb121f8bd6" 
-            }
-        } 
-      
-        stage("Publish to Nexus Repository Manager") {
-            steps {
-                script {
-                    pom = readMavenPom file: "pom.xml";
-                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    artifactPath = filesByGlob[0].path;
-                    artifactExists = fileExists artifactPath;
-                    if(artifactExists) {
-                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
-                        nexusArtifactUploader(
-                            nexusVersion: "nexus3",
-                            protocol: "http",
-                            nexusUrl: "172.23.154.175:8081",
-                            groupId: pom.groupId,
-                            version: pom.version,
-                            repository: "Host",
-                            credentialsId: "pass1",
-                            artifacts: [
-                                [artifactId: pom.artifactId,
-                                        classifier: '',
-                                        file: artifactPath,
-                                        type: pom.packaging]
-                            ]
-                        );
-                    } else {
-                        error "*** File: ${artifactPath}, could not be found";
-                    }
-                }
-            }
-        
-            } 
-     }
-     
+agent any
+stages {
+stage('Build') {
+steps {
+sh 'mvn -B package'
+
 }
-post {
-        always {
+}
 
-            script{
-                BUILD_USER = getBuildUser()
-            }
+stage('SonarQube analysis') {
+environment {
+SCANNER_HOME = tool 'SonarQube Conexion'
+}
+steps {
+withSonarQubeEnv(credentialsId: 'Sonar', installationName: 'Sonarqube') {
+sh '''$SCANNER_HOME/bin/sonar-scanner \
+-Dsonar.projectKey=projectKey \
+-Dsonar.projectName=projectName \
+-Dsonar.sources=src/ \
+-Dsonar.java.binaries=target/classes/ \
+-Dsonar.exclusions=src/test/java/****/*.java \
+-Dsonar.projectVersion=${BUILD_NUMBER}-${GIT_COMMIT_SHORT}'''
+}
+}
+}
 
-            slackSend channel: 'notificaciones-desde-jenkins',
-                      color: COLOR_MAP[currentBuild.currentResult],
-                      message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by ${BUILD_USER} \n More info at ${env.BUILD_URL}HTML_"
+stage("Publish to Nexus Repository Manager") {
+steps {
+script {
+pom = readMavenPom file: "pom.xml";
+filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
 
-        }
+
+
+echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+artifactPath = filesByGlob[0].path;
+artifactExists = fileExists artifactPath;
+if(artifactExists) {
+echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+nexusArtifactUploader(
+nexusVersion: "nexus3",
+protocol: "http",
+nexusUrl: "172.23.154.175:8081",
+groupId: pom.groupId,
+version: pom.version,
+repository: "Host",
+credentialsId: "pass1",
+artifacts: [
+[artifactId: pom.artifactId,
+classifier: '',
+file: artifactPath,
+type: pom.packaging]
+]
+);
+} else {
+error "*** File: ${artifactPath}, could not be found";
+}
+}
+}
+
+}
+}
+
+post{
+failure{
+slackSend( channel: "#notificaciones-desde-jenkins", token: "slack_webhook token", color: "good", message: "${custom_msg()}")
+}
+
+
+}
+}
+
+
+def custom_msg()
+{
+def JENKINS_URL= "172.23.154.175:8080"
+def JOB_NAME = env.JOB_NAME
+def BUILD_ID= env.BUILD_ID
+def JENKINS_LOG= " FAILED: Job [${env.JOB_NAME}] Logs path: ${JENKINS_URL}/job/${JOB_NAME}/${BUILD_ID}/consoleText"
+return JENKINS_LOG
 }
