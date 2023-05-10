@@ -17,7 +17,7 @@ pipeline {
                  sh "mvn clean verify sonar:sonar \
                  -Dsonar.projectKey=Sonar-jenkins \
                  -Dsonar.projectName='Sonar-jenkins' \
-                 -Dsonar.host.url=http://172.27.246.107:9000 \
+                 -Dsonar.host.url=http://172.23.154.175:9000 \
                  -Dsonar.token=sqp_a732c6fc7dd59e223310557619ae5fbb121f8bd6" 
             }
         } 
@@ -35,7 +35,7 @@ pipeline {
                         nexusArtifactUploader(
                             nexusVersion: "nexus3",
                             protocol: "http",
-                            nexusUrl: "172.27.246.107:8081",
+                            nexusUrl: "172.23.154.175:8081",
                             groupId: pom.groupId,
                             version: pom.version,
                             repository: "Host",
@@ -73,7 +73,7 @@ pipeline {
 
 def custom_msg()
 {
-def JENKINS_URL= "172.27.246.107:8080"
+def JENKINS_URL= "172.23.154.175:8080"
 def JOB_NAME = env.JOB_NAME
 def BUILD_ID= env.BUILD_ID
 def JENKINS_LOG= " FAILED: Job [${env.JOB_NAME}] Logs path: ${JENKINS_URL}/job/${JOB_NAME}/${BUILD_ID}/consoleText"
