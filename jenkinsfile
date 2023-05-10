@@ -54,6 +54,8 @@ pipeline {
      }
 }
 
+
+}
 post {
         failure {
 
@@ -67,8 +69,6 @@ post {
 
 
 }
-}
-
 
 def custom_msg()
 {
