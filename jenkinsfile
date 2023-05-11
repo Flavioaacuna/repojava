@@ -43,7 +43,7 @@ pipeline {
                     nexusUrl: "172.23.154.175:8081",
                     groupId: pom.groupId,
                     version: pom.version,
-                    repository: "Host",
+                    repository: "Host1",
                     credentialsId: "pass1",
                     artifacts: [
                     [artifactId: pom.artifactId,
@@ -59,7 +59,7 @@ pipeline {
     }
 }
 }
-}
+
 
     post{
         failure{
