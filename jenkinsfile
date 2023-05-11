@@ -63,9 +63,7 @@ pipeline {
 
     post{
         failure{
-                script{
-                BUILD_USER = getBuildUser()
-                }
+               
             slackSend( channel: "#notificaciones-desde-jenkins", token: "slack trabajo grupal", color: "danger", message: "<@user_id> ${custom_msg()}")
             }
     }
