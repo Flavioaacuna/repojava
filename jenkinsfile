@@ -64,7 +64,7 @@ pipeline {
     post{
         failure{
                
-            slackSend( channel: "#notificaciones-desde-jenkins", token: "slack trabajo grupal", color: "danger", message: "<@user_id> ${custom_msg()}")
+            slackSend( channel: "#notificaciones-desde-jenkins", token: "slack trabajo grupal", color: "danger", message: "${custom_msg()}")
             }
     }
 }
@@ -72,11 +72,9 @@ pipeline {
 
 def custom_msg()
 {
-def userIds = slackUserIdsFromCommitters()
-def userIdsString = userId.collect { "<@$it>" }.join(' ')
 def JENKINS_URL= "172.23.154.175:8080"
 def JOB_NAME = env.JOB_NAME
 def BUILD_ID= env.BUILD_ID
-def JENKINS_LOG= " FAILED: Job ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Revisar-estado>) /The current Pipeline or stage run has a <failed> status"
+def JENKINS_LOG= " FAILED: Job ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Revisar-estado>) ${env.BUILD_DISPLAY_NAME} /The current Pipeline or stage run has a <failed> status"
 return JENKINS_LOG
 }
